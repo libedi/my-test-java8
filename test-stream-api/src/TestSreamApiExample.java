@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.IntSummaryStatistics;
 import java.util.Iterator;
 import java.util.List;
@@ -228,6 +229,27 @@ public class TestSreamApiExample {
 		// 스트림에 있는 모든 문자열을 서로 연결해서 모을 때
 		String joinString = contacts.stream().map(Contact::getName).collect(Collectors.joining());
 		String joinStringClf = contacts.stream().map(Contact::getName).collect(Collectors.joining("|"));
+	}
+	
+	/**
+	 * 주 별로 연락처를 분류하기 (그룹핑)
+	 */
+	public void divideContact(){
+		List<Contact> contacts= new ContactSource().findAll();
+		
+		// for 구문
+		Map<String, List<Contact>> contactsByState = new HashMap<>();
+		for(Contact contact : contacts){
+			if(!contactsByState.containsKey(contact.getState())){
+				contactsByState.put(contact.getState(), new ArrayList<>());
+			}
+			contactsByState.get(contact.getState()).add(contact);
+		}
+		
+		// Stream API(collect(groupingBy)) + Method Reference
+		Map<String, List<Contact>> contactByStateforStream = contacts.stream()
+																	.collect(Collectors.groupingBy(Contact::getState));
+		
 	}
 
 	public static void main(String[] args) {

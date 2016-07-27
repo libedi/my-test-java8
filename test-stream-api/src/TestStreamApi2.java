@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -232,6 +235,65 @@ public class TestStreamApi2 {
 				.filter(c -> Gender.Male == c.getGender())
 				.mapToInt(c -> c.getAge())
 				.average();						// 평균 값을 "계산 후 반환" 하는 최종 연산자
+	}
+	
+	/**
+	 * 스트림 API 정리
+	 */
+	public void summary(){
+		/*
+		 * 스트림 API 3단계
+		 */
+//		orders.stream().map(n->n.price).sum();
+		//   스트림생성|중개연산(변환) |최종연산(스트림사용)
+		
+		/*
+		 * 스트림 생성
+		 * - Collection 	: stream(), parallelStream()
+		 * - Arrays			: stream(*)
+		 * - Stream ranges	: range(...), rangeClosed(...)
+		 * - Directly from values : of(*)
+		 * - Generators		: iterator(..), generate(..)
+		 * - Resources		: lines()
+		 */
+		// Collection
+		List<String> collection = new ArrayList<>();
+		
+		Stream<String> stream = collection.stream();					// 순차 스트림
+		Stream<String> parallelStream = collection.parallelStream();	// 병렬 스트림
+		
+		// Arrays
+		int[] numbers = new int[]{1, 2, 3, 4, 5, 6, 7};
+		
+		IntStream intStream = Arrays.stream(numbers);		// 배열을 스트림으로 변환
+		IntStream pIntStream = intStream.parallel();		// 순차 스트림을 병렬 스트림으로 변환
+		
+		// Directly from values
+		Stream<String> ofStream = Stream.of("Using", "Stream", "API", "From", "Java8");	// of 메소드는 가변인자로 스트림을 생성 가능
+		Stream<String> pOfStream = ofStream.parallel();									// 순차 스트림을 병렬 스트림으로 변환
+		
+		// Stream ranges
+		IntStream rangeStream = IntStream.range(1, 10);			// 1부터 9까지 유한 스트림 생성
+		LongStream longStream = LongStream.rangeClosed(1, 10);	// 1부터 10까지 유한 스트림 생성
+		
+		// Generators : 무한 스트림 (Infinite Stream)
+		Stream<Double> randoms = Stream.generate(Math::random);				// 난수 스트림
+		Stream<Integer> infiniteNumbers = Stream.iterate(0, n -> n + 1);	// 0 1 2 3 ... 무한 수열
+		Stream<int[]> fibonacci = Stream.iterate(new int[]{0, 1},  n -> new int[]{n[1], n[0] + n[1]});	// 피보나치 수열
+		fibonacci.limit(10)
+				 .map(n -> n[0])
+				 .forEach(System.out::println);
+		
+		// Resources
+		// CSV 파일을 읽어 스트림을 생성
+		try(Stream<String> lines = Files.lines(Paths.get("addressBook.csv"))) {
+			long count = lines.map(line -> line.split(","))
+								.filter(values -> values[6].contains("FL"))
+								.count();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public static void main(String[] args){
